@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-    const password = "letmein";
-    const entered = prompt("Enter password to access:");
-  
-    if (entered !== password) {
-      document.body.innerHTML = "<h2>Access denied</h2>";
-      throw new Error("Unauthorized access");
-    }
-  </script>  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flashcard App</title>
@@ -120,6 +111,7 @@
       <option value="correct">Correct</option>
     </select>
     <div class="firm-filters" id="firmFilters"></div>
+    <label><input type="checkbox" id="noFirmsOnly" onchange="applyFilters()"> No Firms Only</label>
   </div>
 
   <div class="grid" id="cardGrid"></div>
@@ -168,18 +160,20 @@
       const difficulty = document.getElementById('difficultyFilter').value;
       const progressFilter = document.getElementById('progressFilter').value;
       const selectedFirms = [...document.querySelectorAll('#firmFilters input:checked')].map(cb => cb.value);
+      const noFirmsOnly = document.getElementById('noFirmsOnly').checked;
 
       filteredCards = cards.filter(c => {
         const status = progress[c.filename];
         const matchesTopic = !topic || c.topic === topic;
         const matchesDifficulty = !difficulty || c.difficulty === difficulty;
         const matchesFirms = selectedFirms.length === 0 || selectedFirms.some(f => c.firms.includes(f));
+        const matchesNoFirms = !noFirmsOnly || c.firms.length === 0;
         const matchesProgress = !progressFilter ||
           (progressFilter === 'unanswered' && status === undefined) ||
           (progressFilter === 'incorrect' && status === false) ||
           (progressFilter === 'correct' && status === true);
 
-        return matchesTopic && matchesDifficulty && matchesFirms && matchesProgress;
+        return matchesTopic && matchesDifficulty && matchesFirms && matchesNoFirms && matchesProgress;
       });
 
       renderCards();
